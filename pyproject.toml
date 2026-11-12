@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragprep"
+version = "0.1.0"
+description = "Clean, chunk, deduplicate and incrementally index documents for RAG"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+ragprep = "ragprep.cli:main"
+
+[tool.setuptools]
+packages = ["ragprep"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
