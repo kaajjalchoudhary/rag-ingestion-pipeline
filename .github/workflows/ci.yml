@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+      - name: End-to-end run on the example docs
+        run: |
+          ragprep ingest examples/docs --db index.sqlite
+          ragprep ingest examples/docs --db index.sqlite | grep -q "unchanged=3"
+          ragprep search "how long does express shipping take" --db index.sqlite -k 1 | grep -q shipping.md
