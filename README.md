@@ -28,7 +28,9 @@ Every rule above has a test in [`tests/`](tests), and CI also runs the pipeline 
 ## Quick start
 
 ```bash
-pip install git+https://github.com/kaajjalchoudhary/rag-ingestion-pipeline.git
+pip install https://github.com/kaajjalchoudhary/rag-ingestion-pipeline/releases/download/v0.1.0/ragprep-0.1.0-py3-none-any.whl
+# or: pip install git+https://github.com/kaajjalchoudhary/rag-ingestion-pipeline.git
+# or: docker run --rm -v "$PWD:/data" ghcr.io/kaajjalchoudhary/ragprep ingest docs --db index.sqlite
 ragprep ingest examples/docs --db index.sqlite
 # added=3 updated=0 unchanged=0 deleted=0 chunks_embedded=3 ...
 ragprep ingest examples/docs --db index.sqlite
