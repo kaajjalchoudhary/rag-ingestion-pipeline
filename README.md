@@ -75,3 +75,13 @@ ragprep/embed.py      Embedder protocol + offline HashingEmbedder
 ragprep/index.py      SQLite schema, incremental sync, search
 ragprep/cli.py        `ragprep ingest` / `ragprep search`
 ```
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+pytest -q
+```
+
+Requires Python 3.10+. The package itself has no runtime dependencies; `pytest` is the only dev dependency.
+CI runs the tests on Python 3.10 and 3.12, then the end-to-end ingest and search check on `examples/docs`.
