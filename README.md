@@ -44,7 +44,9 @@ From Python:
 from ragprep import Index
 
 index = Index("index.sqlite", max_words=120, overlap_words=20)
-stats = index.sync({"faq.md": open("faq.md").read()})
+# index the whole folder (*.md, *.txt); files no longer in it are removed from the index
+stats = index.sync_folder("examples/docs")
+# or pass the full set yourself: index.sync({"faq.md": text, ...})
 for hit in index.search("refund window", k=3):
     print(hit.score, hit.chunk_id, hit.text)
 ```
