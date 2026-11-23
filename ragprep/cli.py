@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from dataclasses import asdict
+from pathlib import Path
 
 from ragprep.index import Index
 
@@ -16,15 +18,25 @@ def main(argv: list[str] | None = None) -> int:
     search = sub.add_parser("search", help="semantic search over the index")
     search.add_argument("query")
     search.add_argument("-k", type=int, default=3)
-    for p in (ingest, search):
+    stats_cmd = sub.add_parser("stats", help="show what the index holds, per embedding model")
+    for p in (ingest, search, stats_cmd):
         p.add_argument("--db", default="ragprep.sqlite")
     args = parser.parse_args(argv)
 
+    if args.command == "stats" and not Path(args.db).exists():
+        print(f"no index at {args.db}; run `ragprep ingest` first", file=sys.stderr)
+        return 1
     index = Index(args.db)
     if args.command == "ingest":
         stats = index.sync_folder(args.folder)
         print(" ".join(f"{k}={v}" for k, v in asdict(stats).items()))
         print(" ".join(f"{k}={v}" for k, v in index.counts().items()))
+    elif args.command == "stats":
+        counts = index.counts()
+        print(" ".join(f"{k}={v}" for k, v in counts.items()))
+        rows = index.db.execute("SELECT model, count(*) FROM embeddings GROUP BY model ORDER BY model")
+        for model, n in rows:
+            print(f"{model}: {n}/{counts['chunks']} chunks embedded")
     else:
         for hit in index.search(args.query, k=args.k):
             print(f"{hit.score:.3f}  {hit.chunk_id}\n       {hit.text[:160]}")
