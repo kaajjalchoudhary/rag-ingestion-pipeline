@@ -3,6 +3,16 @@
 All notable changes to ragprep are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- `ragprep stats`: document, chunk and embedding counts, plus how many chunks each embedding model
+  covers.
+
+### Fixed
+- Switching to a different embedder now embeds the chunks of unchanged documents once. Before, they were
+  skipped, so they had no vectors for the new model and search returned nothing.
+
 ## [0.1.0] - 2026-11-17
 
 First release.
