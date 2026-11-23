@@ -79,6 +79,7 @@ class Index:
                 else:
                     stats.added += 1
                 self._insert(doc_id, documents[doc_id], content_hash, stats)
+            self._embed_missing(stats)
             self._gc_embeddings()
         return stats
 
@@ -122,6 +123,24 @@ class Index:
                 [(h, model, array("f", v).tobytes()) for h, v in zip(to_embed, vectors)],
             )
             stats.chunks_embedded += len(to_embed)
+
+    def _embed_missing(self, stats: SyncStats) -> None:
+        # Unchanged documents are skipped above, so after switching embedders their chunks
+        # have no vector for the current model yet. Embed exactly those, once.
+        model = self.embedder.name
+        missing = self.db.execute(
+            "SELECT c.chunk_hash, c.text FROM chunks c LEFT JOIN embeddings e "
+            "ON e.chunk_hash = c.chunk_hash AND e.model = ? WHERE e.chunk_hash IS NULL",
+            (model,),
+        ).fetchall()
+        if not missing:
+            return
+        vectors = self.embedder.embed([text for _, text in missing])
+        self.db.executemany(
+            "INSERT INTO embeddings VALUES (?, ?, ?)",
+            [(h, model, array("f", v).tobytes()) for (h, _), v in zip(missing, vectors)],
+        )
+        stats.chunks_embedded += len(missing)
 
     def _gc_embeddings(self) -> None:
         # Runs once per sync, after all inserts, so vectors of chunks that only moved are reused first.
