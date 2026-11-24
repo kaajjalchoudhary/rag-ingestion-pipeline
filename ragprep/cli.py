@@ -15,6 +15,10 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     ingest = sub.add_parser("ingest", help="sync a folder of .md/.txt files into the index")
     ingest.add_argument("folder")
+    ingest.add_argument(
+        "--exclude", action="append", default=[], metavar="PATTERN",
+        help="skip files whose path inside the folder matches PATTERN, e.g. 'drafts/*' (repeatable)",
+    )
     search = sub.add_parser("search", help="semantic search over the index")
     search.add_argument("query")
     search.add_argument("-k", type=int, default=3)
@@ -28,7 +32,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     index = Index(args.db)
     if args.command == "ingest":
-        stats = index.sync_folder(args.folder)
+        stats = index.sync_folder(args.folder, exclude=args.exclude)
         print(" ".join(f"{k}={v}" for k, v in asdict(stats).items()))
         print(" ".join(f"{k}={v}" for k, v in index.counts().items()))
     elif args.command == "stats":
