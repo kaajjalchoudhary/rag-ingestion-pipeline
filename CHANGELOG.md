@@ -8,6 +8,8 @@ All notable changes to ragprep are documented here. The format follows
 ### Added
 - `ragprep stats`: document, chunk and embedding counts, plus how many chunks each embedding model
   covers.
+- `ragprep ingest --exclude PATTERN` (and `exclude=` on `Index.sync_folder`) to skip files by their path
+  inside the folder. Excluded files that were already indexed are removed.
 
 ### Fixed
 - Switching to a different embedder now embeds the chunks of unchanged documents once. Before, they were
