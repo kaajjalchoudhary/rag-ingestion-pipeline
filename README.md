@@ -36,6 +36,12 @@ ragprep ingest examples/docs --db index.sqlite
 ragprep ingest examples/docs --db index.sqlite
 # added=0 updated=0 unchanged=3 deleted=0 chunks_embedded=0 ...
 ragprep search "can I return a damaged item" --db index.sqlite
+ragprep stats --db index.sqlite
+# documents=3 chunks=3 embeddings=3
+# hashing-256: 3/3 chunks embedded
+
+# skip files by their path inside the folder (repeatable); excluded files are removed from the index
+ragprep ingest docs --db index.sqlite --exclude 'drafts/*' --exclude '*.txt'
 ```
 
 From Python:
@@ -73,7 +79,7 @@ Vectors are stored per `(chunk_hash, model)`, so switching models re-embeds once
 ragprep/chunking.py   cleaning, PII redaction, boundary-aware chunking
 ragprep/embed.py      Embedder protocol + offline HashingEmbedder
 ragprep/index.py      SQLite schema, incremental sync, search
-ragprep/cli.py        `ragprep ingest` / `ragprep search`
+ragprep/cli.py        `ragprep ingest` / `ragprep search` / `ragprep stats`
 ```
 
 ## Development
