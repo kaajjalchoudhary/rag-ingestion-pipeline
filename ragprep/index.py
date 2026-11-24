@@ -14,6 +14,7 @@ import hashlib
 import sqlite3
 from array import array
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Iterable
 
@@ -83,13 +84,25 @@ class Index:
             self._gc_embeddings()
         return stats
 
-    def sync_folder(self, folder: str | Path, patterns: Iterable[str] = ("*.md", "*.txt")) -> SyncStats:
+    def sync_folder(
+        self,
+        folder: str | Path,
+        patterns: Iterable[str] = ("*.md", "*.txt"),
+        exclude: Iterable[str] = (),
+    ) -> SyncStats:
+        """Sync every file under `folder` matching `patterns`.
+
+        `exclude` holds shell-style patterns matched against each path relative to `folder`
+        (e.g. "drafts/*"); excluded files are treated as absent, so they are removed from the index.
+        """
         root = Path(folder)
-        docs = {
-            p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
-            for pattern in patterns
-            for p in root.rglob(pattern)
-        }
+        exclude = list(exclude)
+        docs = {}
+        for pattern in patterns:
+            for p in root.rglob(pattern):
+                rel = p.relative_to(root).as_posix()
+                if not any(fnmatch(rel, x) for x in exclude):
+                    docs[rel] = p.read_text(encoding="utf-8")
         return self.sync(docs)
 
     def _delete(self, doc_id: str) -> None:
